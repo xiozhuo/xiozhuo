@@ -1,0 +1,56 @@
+<!DOCTYPE HTML> 
+<html> 
+<head> 
+<title>Hello World</title> 
+</head> 
+<body>
+<a href='javascript:p();'>上一页</a><a href='javascript:n();'>下一页</a>
+<div align='center' width="100%" height="100%">
+<table align='left'>
+<TR>
+<TD>序号</TD>
+<TD>客户姓名</TD>
+<TD>性别</TD>
+<TD>联系电话</TD>
+<TD>是否业主</TD>
+<TD>购房意向</TD>
+<TD>客户状态</TD>
+<TD>置业顾问</TD>
+<TD>创建日期</TD>
+<TD>最近一次联系</TD>
+<TD>下次跟进日期</TD>
+<TD>备注</TD>
+</TR>
+</table>
+<iframe src="01.html" id="iframepage" marginheight="0" marginwidth="0" frameborder="0" width="100%" height="560">
+</iframe>
+</div> 
+<a href='javascript:p();'>上一页</a><a href='javascript:n();'>下一页</a>
+
+<script type="text/javascript" language="javascript">
+var index = 1;
+function n(){
+	if(index<67){
+		index++;
+	}
+	var ifm= document.getElementById("iframepage");
+	if(index<10){
+		ifm.src='0'+index+'.html';
+	}else{
+		ifm.src=index+'.html';
+	}
+}
+function p(){
+	if(index>1){
+		index--;
+	}
+	var ifm= document.getElementById("iframepage");
+	if(index<10){
+		ifm.src='0'+index+'.html';
+	}else{
+		ifm.src=index+'.html';
+	}
+}
+</script>
+</body> 
+</html> 
