@@ -1,0 +1,69 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>WooYun</title>
+<base target="_blank"/>
+<style type="text/css">
+a:link {
+color: #856C00;
+text-decoration: none;
+}
+a:visited {
+color: #856C00;
+text-decoration: none;
+}
+a:hover {
+color: #000000;
+text-decoration: underline;
+}
+</style>
+</head>
+<body>
+<div align='left' width='100%'>
+<table id='content' width='100%'>
+<tr>
+<th width='80%'>标题</th>
+<th>状态</th>
+<th>等级(提/商)</th>
+<th>日期</th>
+</tr>
+<tr>
+<td colspan='4'>
+<div style='color:red;'>
+漏洞状态:0=>待厂商确认处理,1=>厂商已经确认,2=>漏洞通知厂商但厂商忽略,3=>未联系到厂商或厂商忽略,4=>正在联系厂商并等待认领<br/>
+危害等级:1=>低,2=>中,3=>高
+</div>
+</td>
+</tr>
+</table>
+</div>
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script type="text/javascript">
+	var html_cst = "<tr><td><a href='{{link}}'>{{title}}</a></td><td>{{status}}</td><td>{{user_harmlevel}}/{{corp_harmlevel}}</td><td>{{date}}</td></tr>";
+	$(function(){
+		$.ajax({
+			type: "GET",
+			url: "http://apis.baidu.com/apistore/wooyun/unclaim?limit=10",
+			beforeSend: function(request) {
+				request.setRequestHeader("apikey", "ac7c239bddf6c503fa22d47a540784e8");
+			},
+			success: function(result) {
+				if(result){
+					var tbj = $('#content');
+					for(var i=0;i<result.length;i++){
+						var tmp = html_cst;
+						tmp=tmp.replace(/{{link}}/g,result[i].link);
+						tmp=tmp.replace(/{{title}}/g,result[i].title);
+						tmp=tmp.replace(/{{status}}/g,result[i].status);
+						tmp=tmp.replace(/{{user_harmlevel}}/g,result[i].user_harmlevel);
+						tmp=tmp.replace(/{{corp_harmlevel}}/g,result[i].corp_harmlevel);
+						tmp=tmp.replace(/{{date}}/g,result[i].date);
+						tbj.append(tmp);
+					}
+				}
+			}
+		});
+	});
+</script>
+</body>
+</html>
