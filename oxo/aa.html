@@ -12,9 +12,9 @@
     <table>
       <tr>
         <th>类型</th>
-        <td><input type='radio' name='aa_type' value='Average' checked='checked'>平均分</td>
-        <td><input type='radio' name='aa_type' value='Percent'>百分比</td>
-        <td><input type='radio' name='aa_type' value='Amount'>金额比</td>
+        <td><input type='radio' name='aa_type' value='Average' checked='checked' onchange='AA.clear();'>平均分</td>
+        <td><input type='radio' name='aa_type' value='Percent' onchange='AA.clear();'>百分比</td>
+        <td><input type='radio' name='aa_type' value='Amount' onchange='AA.clear();'>金额比</td>
       </tr>
       <tr>
       	<th>总消费额</th>
@@ -59,10 +59,10 @@
           params.aaType = aaTypeTags[i].value;
         }
       }
-      params.totalAmt = document.getElementById('total_amt').value;
-      params.feeAmt = document.getElementById('fee_amt').value;
-      params.benefitAmt = document.getElementById('benefit_amt').value;
-      params.aaSum = document.getElementById('aa_num').value;
+      params.totalAmt = new Number(document.getElementById('total_amt').value);
+      params.feeAmt = new Number(document.getElementById('fee_amt').value);
+      params.benefitAmt = new Number(document.getElementById('benefit_amt').value);
+      params.aaSum = new Number(document.getElementById('aa_num').value);
       return params;
     }
     AA.split = function(){
@@ -136,7 +136,7 @@
         var avgTotalTags = document.getElementsByName('avgTotal');
         var tAmt = new Number(0);
         for(var i=0;i<avgTotalTags.length;i++){
-          tPercent += new Number(avgTotalTags[i].value);
+          tAmt += new Number(avgTotalTags[i].value);
         }
         if(tAmt!=params.totalAmt){
           alert('消费额相加不等于总消费额，请重新调整！');
@@ -162,11 +162,19 @@
       document.getElementById('a_'+idx).value=amt;
     }
     AA.reCalculateByAmount = function(idx,reAmount,params){
-      document.getElementById('p_'+idx).value;
-      document.getElementById('t_'+idx).value;
-      document.getElementById('f_'+idx).value;
-      document.getElementById('b_'+idx).value;
-      document.getElementById('a_'+idx).value;
+      var ppp = reAmount/params.totalAmt;
+      var avgPercent = 100*ppp;
+      var avgFee = params.feeAmt*ppp;
+      var avgBenefit = params.benefitAmt*ppp;
+      var amt = reAmount+avgFee-avgBenefit;
+      document.getElementById('p_'+idx).value=avgPercent;
+      document.getElementById('f_'+idx).value=avgFee;
+      document.getElementById('b_'+idx).value=avgBenefit;
+      document.getElementById('a_'+idx).value=amt;
+    }
+    AA.clear = function(){
+      var result = document.getElementById('result');
+      result.innerHTML = '';
     }
   </script>
 </body>
