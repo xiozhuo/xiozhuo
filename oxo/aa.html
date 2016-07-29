@@ -18,20 +18,20 @@
       </tr>
       <tr>
       	<th>总消费额</th>
-       <td colspan='2'><input type='number' id='total_amt' name='total_amt' value='0' onchange='AA.checkNumber(this);'></td>
+       <td colspan='2'><input type='number' id='total_amt' name='total_amt' value='100' onchange='AA.checkNumber(this);'></td>
        <td rowspan='4' valign='bottom'><button onclick='AA.split();'>预拆分</button></td>
       </tr>
       <tr>
       	<th>额外费用</th>
-       <td colspan='2'><input type='number' id='fee_amt' name='fee_amt' value='0' onchange='AA.checkNumber(this);'></td>
+       <td colspan='2'><input type='number' id='fee_amt' name='fee_amt' value='10' onchange='AA.checkNumber(this);'></td>
       </tr>
       <tr>
       	<th>总优惠额</th>
-       <td colspan='2'><input type='number' id='benefit_amt' name='benefit_amt' value='0' onchange='AA.checkNumber(this);'></td>
+       <td colspan='2'><input type='number' id='benefit_amt' name='benefit_amt' value='20' onchange='AA.checkNumber(this);'></td>
       </tr>
       <tr>
       	<th>消费人数</th>
-       <td colspan='2'><input type='number' id='aa_num' name='aa_num' value='0' onchange='AA.checkNumber(this);'></td>
+       <td colspan='2'><input type='number' id='aa_num' name='aa_num' value='3' onchange='AA.checkNumber(this);'></td>
       </tr>
     </table>
     <hr>
@@ -51,24 +51,38 @@
       }
       element.value = num;
     }
-    
-    AA.split = function(){
+    AA.query =function(){
+      var params = new Object();
       var aaTypeTags = document.getElementsByName('aa_type');
-      var aaType;
       for(var i=0;i<aaTypeTags.length;i++){
         if(aaTypeTags[i].checked){
-          aaType = aaTypeTags[i].value;
+          params.aaType = aaTypeTags[i].value;
         }
       }
-      alert(aaType);
-      var totalAmt = document.getElementById('total_amt').value;
-      var feeAmt = document.getElementById('fee_amt').value;
-      var benefitAmt = document.getElementById('benefit_amt').value;
-      var aaSum = document.getElementById('aa_num').value;
-      
+      params.totalAmt = document.getElementById('total_amt').value;
+      params.feeAmt = document.getElementById('fee_amt').value;
+      params.benefitAmt = document.getElementById('benefit_amt').value;
+      params.aaSum = document.getElementById('aa_num').value;
+      return params;
+    }
+    AA.split = function(){
+		var params = AA.query();
+      AA.splitTable(params.totalAmt,params.feeAmt,params.benefitAmt,params.aaSum);
+      var aaType = params.aaType;
+      var result = document.getElementById('result');
+      var reButton= "<tr><td colspan='6' align='center'><button onclick='AA.reCalculate();'>重新计算</button></td></tr>"
       if('Percent'==aaType){
+        var avgPercentTags = document.getElementsByName('avgPercent');
+        for(var i=0;i<avgPercentTags.length;i++){
+          avgPercentTags[i].disabled='';
+        }
+        result.innerHTML += reButton;
       }else if('Amount'==aaType){
-      }else{
+        var avgTotalTags = document.getElementsByName('avgTotal');
+        for(var i=0;i<avgTotalTags.length;i++){
+          avgTotalTags[i].disabled='';
+        }
+        result.innerHTML += reButton;
       }
     }
     AA.splitTable = function(totalAmt,feeAmt,benefitAmt,aaSum){
@@ -80,16 +94,79 @@
       var avgTotal=totalAmt/aaSum;
       var avgFee=feeAmt/aaSum;
       var avgBenefit=benefitAmt/aaSum;
+      var avgPercent = 100/aaSum;
+      var tmp = '<tr><th>序号</th><th>比例(百分)</th><th>消费额</th><th>费用额</th><th>优惠额</th><th>实付额</th></tr>';
       for(var i=0;i<aaSum;i++){
-        
+       tmp += AA.addTr(i,avgTotal,avgFee,avgBenefit,avgPercent);
       }
+      result.innerHTML = tmp;
     }
     
-    AA.addTr = function(idx,avgTotal,avgFee,avgBenefit){
-    }
-    AA.calculate = function(){
+    AA.addTr = function(idx,avgTotal,avgFee,avgBenefit,avgPercent){
+      var newTr = "<tr>";
+      newTr += "<th>"+(idx+1)+"</th>";
+      newTr += "<td><input type='number' id='p_"+idx+"' name='avgPercent' value='"+avgPercent+"' disabled='disabled' onchange='AA.checkNumber(this);'></td>";
+      newTr += "<td><input type='number' id='t_"+idx+"' name='avgTotal' value='"+avgTotal+"' disabled='disabled' onchange='AA.checkNumber(this);'></td>";
+      newTr += "<td><input type='number' id='f_"+idx+"' name='avgFee' value='"+avgFee+"' disabled='disabled'></td>";
+      newTr += "<td><input type='number' id='b_"+idx+"' name='avgBenefit' value='"+avgBenefit+"' disabled='disabled'></td>";
+      newTr += "<td><input type='number' id='a_"+idx+"' name='avgAmount' value='"+(avgTotal+avgFee-avgBenefit)+"' disabled='disabled'></td>";
+      newTr += "</tr>";
+      return newTr;
     }
     AA.reCalculate = function(){
+      var params = AA.query();
+      var aaType = params.aaType;
+      if('Percent'==aaType){
+        var avgPercentTags = document.getElementsByName('avgPercent');
+        var tPercent = new Number(0);
+        for(var i=0;i<avgPercentTags.length;i++){
+          tPercent += new Number(avgPercentTags[i].value);
+        }
+        if(tPercent!=100){
+          alert('比例相加不等于100，请重新调整！');
+          return;
+        }
+        for(var i=0;i<avgPercentTags.length;i++){
+          var rePercent = new Number(avgPercentTags[i].value);
+          var id = avgPercentTags[i].id;
+          var idx = id.substring(id.lastIndexOf('_')+1);
+          AA.reCalculateByPercent(idx,rePercent,params);
+        }
+      }else if('Amount'==aaType){
+        var avgTotalTags = document.getElementsByName('avgTotal');
+        var tAmt = new Number(0);
+        for(var i=0;i<avgTotalTags.length;i++){
+          tPercent += new Number(avgTotalTags[i].value);
+        }
+        if(tAmt!=params.totalAmt){
+          alert('消费额相加不等于总消费额，请重新调整！');
+          return;
+        }
+        for(var i=0;i<avgTotalTags.length;i++){
+          var reAmount = new Number(avgTotalTags[i].value);
+          var id = avgTotalTags[i].id;
+          var idx = id.substring(id.lastIndexOf('_')+1);
+          AA.reCalculateByAmount(idx,reAmount,params);
+        }
+      }
+    }
+    AA.reCalculateByPercent = function(idx,rePercent,params){
+      var ppp = rePercent/100;
+      var avgTotal = params.totalAmt*ppp;
+      var avgFee = params.feeAmt*ppp;
+      var avgBenefit = params.benefitAmt*ppp;
+      var amt = avgTotal+avgFee-avgBenefit;
+      document.getElementById('t_'+idx).value=avgTotal;
+      document.getElementById('f_'+idx).value=avgFee;
+      document.getElementById('b_'+idx).value=avgBenefit;
+      document.getElementById('a_'+idx).value=amt;
+    }
+    AA.reCalculateByAmount = function(idx,reAmount,params){
+      document.getElementById('p_'+idx).value;
+      document.getElementById('t_'+idx).value;
+      document.getElementById('f_'+idx).value;
+      document.getElementById('b_'+idx).value;
+      document.getElementById('a_'+idx).value;
     }
   </script>
 </body>
