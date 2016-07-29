@@ -49,6 +49,9 @@
       if(isNaN(num)){
         num = 0;
       }
+      if(num<0){
+      	num = -num;
+      }
       element.value = num;
     }
     AA.query =function(){
@@ -88,7 +91,7 @@
     AA.splitTable = function(totalAmt,feeAmt,benefitAmt,aaSum){
       var result = document.getElementById('result');
       result.innerHTML = '';
-      if(aaSum==null||aaSum==0){
+      if(aaSum<=0||totalAmt<=0){
         return;
       }
       var avgTotal=totalAmt/aaSum;
